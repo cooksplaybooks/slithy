@@ -168,7 +168,7 @@ body::before{
   border:1px solid var(--rule);padding:9px;
 }
 .plate-inner{border:1px solid var(--rule-soft);padding:30px 26px 34px;text-align:center}
-.beast-wrap{position:relative;width:100%;aspect-ratio:1/.86}
+.beast-wrap{position:relative;width:100%;height:clamp(148px,30vh,320px)}
 canvas#beast{width:100%;height:100%;display:block}
 .plate-no{
   font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
@@ -297,6 +297,70 @@ canvas#beast{width:100%;height:100%;display:block}
   font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20;
 }
 .toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* Short viewports: a shared link must land the creature, the word and the
+   definition on the first screen, or the payoff is lost before anyone scrolls. */
+@media (max-height:840px){
+  .masthead{padding:30px 0 22px}
+  .brand{font-size:clamp(2rem,5.2vw,2.8rem)}
+  .tagline{font-size:.95rem;margin-top:11px}
+  .controls{margin:0 0 42px}
+  .plate{padding:7px}
+  .plate-inner{padding:20px 22px 26px}
+  .plate-no{margin:5px 0 13px}
+  .word{font-size:clamp(2.1rem,7.4vw,3.4rem)}
+  .pron{margin-top:11px;font-size:.9rem}
+  .rule-orn{margin:15px 0}
+  .def{font-size:1.04rem}
+  .usage{margin-top:15px;font-size:.95rem}
+  .etym{margin-top:16px}
+  .sec{padding-bottom:46px}
+}
+@media (max-height:660px){
+  .masthead{padding:20px 0 16px}
+  .brand{font-size:clamp(1.8rem,5vw,2.3rem)}
+  .tagline{font-size:.88rem;margin-top:8px;max-width:30em}
+  .controls{margin:0 0 36px}
+  .plate-inner{padding:16px 18px 22px}
+  .plate-no{margin:3px 0 10px}
+  .word{font-size:clamp(1.9rem,7vw,2.9rem)}
+  .pron{margin-top:9px}
+  .rule-orn{margin:12px 0}
+  .def{font-size:1rem;line-height:1.48}
+}
+
+/* Phones: the stacked controls are the expensive part of the first screen,
+   so they tighten hard and the decorative "or" steps out of the way. */
+@media (max-height:760px) and (max-width:680px){
+  .masthead{padding:16px 0 13px}
+  .brand{font-size:1.85rem}
+  .tagline{font-size:.85rem;margin-top:8px;line-height:1.5}
+  .controls{margin:0 0 32px;gap:9px}
+  .joiner{display:none}
+  .beast-wrap{height:clamp(132px,24vh,220px)}
+  .plate{padding:6px}
+  .plate-inner{padding:14px 16px 20px}
+  .plate-no{margin:3px 0 9px;font-size:.64rem}
+  .word{font-size:clamp(1.85rem,8.4vw,2.5rem)}
+  .pron{margin-top:8px;font-size:.86rem}
+  .rule-orn{margin:11px 0}
+  .def{font-size:.99rem;line-height:1.46}
+  .usage{margin-top:12px}
+}
+@media (max-height:600px) and (max-width:680px){
+  .masthead{padding:9px 0 7px}
+  .brand{font-size:1.65rem}
+  .tagline{font-size:.75rem;margin-top:5px;line-height:1.42}
+  .beast-wrap{height:clamp(82px,17vh,160px)}
+  .controls{margin-bottom:22px;gap:7px}
+  .plate{padding:5px}
+  .plate-inner{padding:11px 14px 14px}
+  .plate-no{display:none}          /* decorative; the word and definition win the space */
+  .word{font-size:clamp(1.65rem,7.8vw,2.1rem)}
+  .pron{margin-top:5px;font-size:.8rem}
+  .rule-orn{margin:6px 0}
+  .def{font-size:.92rem;line-height:1.4}
+}
 
 @media (max-width:680px){
   .poem{columns:1}
