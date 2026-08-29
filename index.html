@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Coin a word that does not exist yet, and watch it draw its own engraved beast.">
+<meta property="og:title" content="Slithy">
+<meta property="og:description" content="A foundry for words that don&#39;t exist yet - and engraved portraits of what they&#39;d be.">
+<title>Slithy — coin a word, meet the beast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&display=swap">
+
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#e3e2d2;
+  --paper-2:#edece1;
+  --ink:#211d2c;
+  --ink-2:#5d5768;
+  --rule:#b5b3a0;
+  --rule-soft:#cfcdba;
+  --verdigris:#2e5c4e;
+  --madder:#95352a;
+  --brass:#93712f;
+  --grain:.055;
+  --f-disp:"Fraunces","Hoefler Text",Georgia,serif;
+  --f-body:"Newsreader","Iowan Old Style",Georgia,serif;
+  --wonk:"WONK" 1,"SOFT" 40;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#14171a;
+    --paper-2:#1c2124;
+    --ink:#dedecb;
+    --ink-2:#8e938c;
+    --rule:#39413d;
+    --rule-soft:#2a3230;
+    --verdigris:#7cc4a5;
+    --madder:#e0806c;
+    --brass:#cba361;
+    --grain:.09;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14171a;
+  --paper-2:#1c2124;
+  --ink:#dedecb;
+  --ink-2:#8e938c;
+  --rule:#39413d;
+  --rule-soft:#2a3230;
+  --verdigris:#7cc4a5;
+  --madder:#e0806c;
+  --brass:#cba361;
+  --grain:.09;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9;
+  opacity:var(--grain);
+  background-image:radial-gradient(circle at 1px 1px,var(--ink) .5px,transparent 0);
+  background-size:3px 3px;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 22px}
+.sec{padding:0 0 64px}
+
+/* ---------- masthead ---------- */
+.masthead{padding:52px 0 34px;text-align:center}
+.brand{
+  font-family:var(--f-disp);font-variation-settings:var(--wonk);
+  font-weight:800;font-size:clamp(2.4rem,7vw,3.4rem);
+  letter-spacing:-.02em;line-height:1;margin:0;
+}
+.brand .dot{color:var(--madder)}
+.tagline{
+  margin:14px auto 0;max-width:34em;color:var(--ink-2);
+  font-size:1.02rem;text-wrap:balance;
+}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.20em;text-transform:uppercase;
+  color:var(--ink-2);margin:0 0 18px;font-weight:600;
+}
+
+/* ---------- controls ---------- */
+.controls{
+  display:flex;gap:14px;align-items:center;justify-content:center;
+  flex-wrap:wrap;margin:0 0 40px;
+}
+.btn{
+  font-family:var(--f-body);font-size:1rem;font-weight:600;
+  background:var(--ink);color:var(--paper-2);
+  border:none;border-radius:2px;padding:13px 26px;cursor:pointer;
+  letter-spacing:.01em;transition:transform .12s ease,opacity .12s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{
+  background:transparent;color:var(--ink);
+  border:1px solid var(--rule);padding:12px 20px;font-weight:500;
+}
+.btn.ghost:hover{border-color:var(--ink);background:var(--paper-2)}
+.btn:focus-visible,.field:focus-visible,.nw:focus-visible,.chip:focus-visible{
+  outline:2px solid var(--verdigris);outline-offset:3px;
+}
+.joiner{color:var(--ink-2);font-style:italic;font-size:.95rem}
+.field{
+  font-family:var(--f-body);font-size:1rem;color:var(--ink);
+  background:transparent;border:none;border-bottom:1px solid var(--rule);
+  padding:11px 4px;width:190px;text-align:center;
+}
+.field::placeholder{color:var(--ink-2);opacity:.75;font-style:italic}
+.field:focus{border-bottom-color:var(--verdigris);outline:none}
+
+/* ---------- the plate ---------- */
+.plate{
+  margin:0 auto;max-width:520px;background:var(--paper-2);
+  border:1px solid var(--rule);padding:9px;
+}
+.plate-inner{border:1px solid var(--rule-soft);padding:30px 26px 34px;text-align:center}
+.beast-wrap{position:relative;width:100%;aspect-ratio:1/.86}
+canvas#beast{width:100%;height:100%;display:block}
+.plate-no{
+  font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-2);margin:6px 0 20px;
+}
+.word{
+  font-family:var(--f-disp);font-variation-settings:var(--wonk);
+  font-weight:700;font-size:clamp(2.6rem,10.5vw,4.4rem);
+  line-height:.98;letter-spacing:-.025em;margin:0;
+  word-break:break-word;text-wrap:balance;
+}
+.word span{display:inline-block;opacity:0;transform:translateY(.14em)}
+.word span.in{opacity:1;transform:none;transition:opacity .34s ease,transform .34s ease}
+.pron{
+  margin:14px 0 0;color:var(--ink-2);font-size:.95rem;
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:baseline;
+}
+.pron .pos{font-style:italic;color:var(--verdigris)}
+.pron .sep{opacity:.45}
+.rule-orn{
+  display:flex;align-items:center;gap:12px;margin:22px 0;
+  color:var(--rule);font-size:.8rem;
+}
+.rule-orn::before,.rule-orn::after{content:"";flex:1;height:1px;background:var(--rule)}
+.def{margin:0;font-size:1.1rem;line-height:1.55;text-wrap:pretty}
+.usage{
+  margin:20px 0 0;padding:0;font-style:italic;color:var(--ink-2);
+  font-size:1rem;line-height:1.5;border:none;
+}
+.etym{
+  margin:22px 0 0;font-size:.76rem;letter-spacing:.05em;
+  color:var(--ink-2);opacity:.85;
+}
+.share{display:flex;gap:10px;justify-content:center;margin:24px 0 0;flex-wrap:wrap}
+
+/* ---------- starters ---------- */
+.starters{text-align:center;padding-top:8px}
+.chips{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:0;padding:0;list-style:none}
+.chip{
+  font-family:var(--f-disp);font-variation-settings:var(--wonk);
+  font-weight:600;font-size:1rem;
+  background:transparent;border:1px solid var(--rule-soft);border-radius:2px;
+  padding:7px 15px;cursor:pointer;color:var(--ink);
+  transition:border-color .12s ease,color .12s ease;
+}
+.chip:hover{border-color:var(--verdigris);color:var(--verdigris)}
+
+/* ---------- ode ---------- */
+.ode{border-top:1px solid var(--rule);padding-top:52px}
+.ode-head{text-align:center;margin-bottom:36px}
+.ode-title{
+  font-family:var(--f-disp);font-variation-settings:var(--wonk);
+  font-weight:700;font-size:clamp(1.8rem,5vw,2.5rem);
+  margin:0 0 12px;letter-spacing:-.02em;
+}
+.ode-intro{max-width:38em;margin:0 auto;color:var(--ink-2);text-wrap:pretty}
+.poem{
+  columns:2;column-gap:56px;max-width:760px;margin:0 auto;
+  font-size:1.02rem;line-height:1.75;
+}
+.stanza{break-inside:avoid;margin:0 0 1.7em}
+.stanza p{margin:0}
+.stanza .ind{padding-left:2.4em}
+.nw{
+  font-weight:inherit;font-style:normal;cursor:pointer;
+  color:var(--verdigris);border-bottom:1px dotted var(--verdigris);
+  background:none;border-top:none;border-left:none;border-right:none;
+  font-family:inherit;font-size:inherit;padding:0;line-height:inherit;
+}
+.nw:hover{background:var(--paper-2);color:var(--madder);border-bottom-color:var(--madder)}
+.nw.on{color:var(--madder);border-bottom-color:var(--madder)}
+.gloss{
+  max-width:760px;margin:34px auto 0;padding:20px 22px;
+  background:var(--paper-2);border-left:2px solid var(--verdigris);
+}
+.gloss-w{
+  font-family:var(--f-disp);font-variation-settings:var(--wonk);
+  font-weight:700;font-size:1.5rem;margin:0 0 4px;
+}
+.gloss-src{
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-2);margin:0 0 12px;
+}
+.gloss-t{margin:0 0 16px;text-wrap:pretty}
+.foot{
+  border-top:1px solid var(--rule);padding:26px 0 60px;text-align:center;
+  color:var(--ink-2);font-size:.85rem;
+}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+  background:var(--ink);color:var(--paper-2);padding:10px 20px;border-radius:2px;
+  font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20;
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:680px){
+  .poem{columns:1}
+  .plate-inner{padding:22px 18px 26px}
+  .field{width:160px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <h1 class="brand">Slithy<span class="dot">.</span></h1>
+    <p class="tagline">A foundry for words that don't exist yet — and engraved portraits of what they'd be. Every word draws its own beast, the same way, forever.</p>
+  </header>
+
+  <section class="sec">
+    <div class="controls">
+      <button class="btn" id="coin">Coin a word</button>
+      <span class="joiner">or</span>
+      <input class="field" id="own" placeholder="bring your own" maxlength="20" autocomplete="off" spellcheck="false" aria-label="Type your own invented word">
+    </div>
+
+    <figure class="plate">
+      <div class="plate-inner">
+        <div class="beast-wrap"><canvas id="beast" aria-label="An engraved illustration of the coined word"></canvas></div>
+        <div class="plate-no">Plate No.&nbsp;<span id="plateno">—</span></div>
+        <h2 class="word" id="word"></h2>
+        <p class="pron"><span id="pron"></span><span class="sep">·</span><span class="pos" id="pos"></span></p>
+        <div class="rule-orn">✦</div>
+        <p class="def" id="def"></p>
+        <p class="usage" id="usage"></p>
+        <p class="etym" id="etym"></p>
+      </div>
+    </figure>
+
+    <div class="share">
+      <button class="btn ghost" id="copylink">Copy link to this word</button>
+      <button class="btn ghost" id="copytext">Copy the specimen</button>
+    </div>
+  </section>
+
+  <section class="sec starters">
+    <p class="eyebrow">Start here</p>
+    <ul class="chips">
+      <li><button class="chip" data-w="snickerdoom">snickerdoom</button></li>
+      <li><button class="chip" data-w="flusterbeak">flusterbeak</button></li>
+      <li><button class="chip" data-w="wobbleth">wobbleth</button></li>
+      <li><button class="chip" data-w="grimsy">grimsy</button></li>
+    </ul>
+  </section>
+
+  <section class="sec ode">
+    <div class="ode-head">
+      <h2 class="ode-title">An Ode to the Jabberwock</h2>
+      <p class="ode-intro">Lewis Carroll published this in 1871 and invented most of it on the spot. Later, in <em>Through the Looking-Glass</em>, Humpty Dumpty sat Alice down and explained what the words meant. Tap any one of them.</p>
+    </div>
+
+    <div class="poem" id="poem">
+      <div class="stanza">
+        <p>'Twas <button class="nw" data-w="brillig">brillig</button>, and the <button class="nw" data-w="slithy">slithy</button> <button class="nw" data-w="toves">toves</button></p>
+        <p class="ind">Did <button class="nw" data-w="gyre">gyre</button> and <button class="nw" data-w="gimble">gimble</button> in the <button class="nw" data-w="wabe">wabe</button>:</p>
+        <p>All <button class="nw" data-w="mimsy">mimsy</button> were the <button class="nw" data-w="borogoves">borogoves</button>,</p>
+        <p class="ind">And the <button class="nw" data-w="mome">mome</button> <button class="nw" data-w="raths">raths</button> <button class="nw" data-w="outgrabe">outgrabe</button>.</p>
+      </div>
+      <div class="stanza">
+        <p>"Beware the <button class="nw" data-w="Jabberwock">Jabberwock</button>, my son!</p>
+        <p class="ind">The jaws that bite, the claws that catch!</p>
+        <p>Beware the <button class="nw" data-w="Jubjub">Jubjub</button> bird, and shun</p>
+        <p class="ind">The <button class="nw" data-w="frumious">frumious</button> <button class="nw" data-w="Bandersnatch">Bandersnatch</button>!"</p>
+      </div>
+      <div class="stanza">
+        <p>He took his <button class="nw" data-w="vorpal">vorpal</button> sword in hand;</p>
+        <p class="ind">Long time the <button class="nw" data-w="manxome">manxome</button> foe he sought—</p>
+        <p>So rested he by the <button class="nw" data-w="Tumtum">Tumtum</button> tree</p>
+        <p class="ind">And stood awhile in thought.</p>
+      </div>
+      <div class="stanza">
+        <p>And, as in <button class="nw" data-w="uffish">uffish</button> thought he stood,</p>
+        <p class="ind">The Jabberwock, with eyes of flame,</p>
+        <p>Came <button class="nw" data-w="whiffling">whiffling</button> through the <button class="nw" data-w="tulgey">tulgey</button> wood,</p>
+        <p class="ind">And <button class="nw" data-w="burbled">burbled</button> as it came!</p>
+      </div>
+      <div class="stanza">
+        <p>One, two! One, two! And through and through</p>
+        <p class="ind">The vorpal blade went <button class="nw" data-w="snicker-snack">snicker-snack</button>!</p>
+        <p>He left it dead, and with its head</p>
+        <p class="ind">He went <button class="nw" data-w="galumphing">galumphing</button> back.</p>
+      </div>
+      <div class="stanza">
+        <p>"And hast thou slain the Jabberwock?</p>
+        <p class="ind">Come to my arms, my <button class="nw" data-w="beamish">beamish</button> boy!</p>
+        <p>O <button class="nw" data-w="frabjous">frabjous</button> day! <button class="nw" data-w="Callooh">Callooh</button>! <button class="nw" data-w="Callay">Callay</button>!"</p>
+        <p class="ind">He <button class="nw" data-w="chortled">chortled</button> in his joy.</p>
+      </div>
+      <div class="stanza">
+        <p>'Twas brillig, and the slithy toves</p>
+        <p class="ind">Did gyre and gimble in the wabe:</p>
+        <p>All mimsy were the borogoves,</p>
+        <p class="ind">And the mome raths outgrabe.</p>
+      </div>
+    </div>
+
+    <div class="gloss" id="gloss">
+      <p class="gloss-w" id="gw">slithy</p>
+      <p class="gloss-src" id="gs">Humpty Dumpty, to Alice</p>
+      <p class="gloss-t" id="gt">"Lithe and slimy. Lithe is the same as active. You see it's like a portmanteau — there are two meanings packed up into one word."</p>
+      <button class="btn ghost" id="gbtn">Illustrate it ⟶</button>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>A <em>nonce word</em> is one coined for a single occasion. Carroll coined about twenty and we're still using four of them.</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const TAU = Math.PI*2;
+
+/* ============ seeded randomness ============ */
+function hashStr(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function rngFor(s){return mulberry(hashStr(s))}
+const pick=(r,a)=>a[Math.floor(r()*a.length)%a.length];
+
+/* ============ word banks ============ */
+const ADJ=["slimy","lithe","flimsy","miserable","gloomy","prickly","shabby","sullen","dainty","murky","brittle","gaudy","clammy","soggy","wispy","gangly","portly","jaunty","surly","sluggish","drowsy","frantic","feverish","ghastly","gawky","glossy","gritty","husky","knobbly","lanky","leathery","mottled","nimble","plucky","pompous","ragged","ruddy","scruffy","shaggy","sheepish","sinewy","sooty","spindly","stodgy","sultry","tawny","tousled","velvety","waxen","weathered","wily","woolly","wretched","furious","peckish","doleful","chipper"];
+const VERB=["chuckle","snort","gallop","bellow","whistle","squirm","wriggle","bristle","shiver","glimmer","flicker","grumble","mumble","stumble","waddle","wobble","sputter","flutter","clatter","glitter","blunder","swagger","stagger","giggle","wallow","burrow","scurry","skitter","slither","squelch","splutter","murmur","simmer","smoulder","prickle","tickle","trundle","lumber","droop","swoop","lurk","gawk","squint","ponder","dither","fidget","fluster","bluster","muddle","tangle","sulk","preen","strut","prance","frolic","cavort","tumble","sprawl","slouch","teeter","totter","quiver","tremble","flinch","scamper","trudge","saunter","meander","wander","glide","plummet","hover","snuffle","rummage","hiccup","natter"];
+const BEASTS=["borogove","rath","tove","bandersnatch","dormouse","hedgehog","Jubjub bird","mock turtle","gryphon","bread-and-butterfly"];
+const PLACES=["under a sundial","in the tulgey wood","behind the wainscot","in the third drawer down","at the bottom of a teapot","along a hedgerow","just past the umbrella-stand","in the space beneath a Tuesday","under the good tablecloth","at the far end of the airing cupboard"];
+const TIMES=["at four in the afternoon","the moment you look away","on the way to somewhere else","in the second before you sneeze","during other people's anecdotes","just after the kettle clicks"];
+const MANNER=["with tremendous conviction and no plan","slowly, and then all at once","in a manner that invites comment","as though it were somebody else's idea","with the sound of a wet umbrella","far more thoroughly than required","politely, but not kindly"];
+const DIALECTS=["Tulgey","Wabe-side","Mome-shire","Outgrabe Fen","Lower Snark","Bandersnatch Reach","Tumtum Vale"];
+const ROOTS=["an older word for the same mistake","a cry once used to move geese","the noise itself","a surname, probably","two words that quarrelled and settled","a misprint that stuck"];
+
+const ONSETS=["b","bl","br","ch","cl","cr","d","dr","f","fl","fr","g","gl","gr","h","j","k","kn","l","m","n","p","pl","pr","qu","r","s","sc","scr","sh","shr","sk","sl","sm","sn","sp","spl","squ","st","str","sw","t","th","thr","tr","tw","v","w","wh","wr"];
+const FAVE=["sl","sn","gr","br","fl","wh","thr","squ","gl","tw","fr","sw"];
+const NUC=["a","e","i","o","u","ai","ea","ee","ie","oa","oi","oo","ou","ow","u","i","o"];
+const CODA=["b","ck","d","dge","ff","g","k","l","lch","ld","lk","m","mp","n","nch","nd","ng","nk","nt","p","r","rk","rl","rm","sh","sk","sp","ss","st","t","tch","th","zz",""];
+const TAIL=["y","ous","ish","le","er","ling","some","ock","um","oid","ery","ard"];
+const MEDIAL=["b","bl","br","d","dl","dr","f","fl","g","gl","gr","k","l","m","mb","n","nd","p","pl","r","s","sh","sl","sn","st","t","th","tl","tr","v","w","z","ch","ck","mp","nk"];
+
+/* ============ blending ============ */
+function firstVowelEnd(w){const v=/[aeiouy]+/.exec(w);return v?v.index+v[0].length:-1}
+function blend(a,b){
+  const ea=firstVowelEnd(a), eb=firstVowelEnd(b);
+  if(ea<1||eb<1) return null;
+  const head=a.slice(0,ea), tail=b.slice(eb);
+  if(!tail||/^[aeiouy]/.test(tail)||tail.length<2) return null;
+  const out=head+tail;
+  if(out.length<5||out.length>11||out===a||out===b) return null;
+  return out;
+}
+
+/* ============ phonetic texture ============ */
+function texture(w){
+  const s=w.toLowerCase().replace(/[^a-z]/g,"")||"x";
+  let sp=0,ro=0,sl=0;
+  for(const c of s){
+    if("ktpgxzqcj".includes(c)) sp++;
+    if("oumbwl".includes(c)) ro++;
+    if("slhfv".includes(c)) sl++;
+  }
+  const n=s.length;
+  return {spike:Math.min(1,sp/n*2.4), plump:Math.min(1,ro/n*2.4), slick:Math.min(1,sl/n*2.4), n:n};
+}
+
+/* ============ pronunciation ============ */
+const DIGRAPHS=["tch","dge","thr","shr","sch","ch","sh","th","ph","wh","ck","ng","gh","qu","kn","wr"];
+function syllables(w){
+  const s=w.toLowerCase().replace(/[^a-z]/g,"");
+  if(!s) return [w];
+  const U=[];
+  for(let i=0;i<s.length;){
+    let m=null;
+    for(const d of DIGRAPHS){ if(s.startsWith(d,i)){m=d;break} }
+    if(!m){const vm=/^[aeiouy]+/.exec(s.slice(i)); m=vm?vm[0]:s[i]}
+    U.push(m); i+=m.length;
+  }
+  const isV=u=>/^[aeiouy]/.test(u);
+  const out=[]; let cur=[], i=0;
+  while(i<U.length){
+    while(i<U.length&&!isV(U[i])){cur.push(U[i]);i++}
+    if(i>=U.length) break;
+    cur.push(U[i]); i++;
+    const cons=[]; let j=i;
+    while(j<U.length&&!isV(U[j])){cons.push(U[j]);j++}
+    if(j>=U.length){cur.push.apply(cur,cons);out.push(cur.join(""));cur=[];i=j;break}
+    if(cons.length>=2||cons[0]==="ck"||cons[0]==="ng"){cur.push(cons[0]);i++}
+    out.push(cur.join(""));cur=[];
+  }
+  if(cur.length){ if(out.length) out[out.length-1]+=cur.join(""); else out.push(cur.join("")) }
+  // a trailing silent-e syllable belongs to the syllable before it
+  if(out.length>1&&/^[^aeiouy]*e$/.test(out[out.length-1])){const t=out.pop();out[out.length-1]+=t}
+  return out.filter(Boolean);
+}
+function respell(w){
+  const sy=syllables(w);
+  return sy.map((s,i)=>{
+    let t=s.replace(/y$/,"ee").replace(/ough/g,"uff").replace(/ious$/,"ee-us")
+           .replace(/ous$/,"us").replace(/ou/g,"ow")
+           .replace(/ph/g,"f").replace(/ck/g,"k").replace(/cc/g,"k").replace(/qu/g,"kw");
+    return i===0 ? "ˈ"+t.toUpperCase() : t;
+  }).join("-");
+}
+/* inflection */
+function dbl(v){ return (syllables(v).length===1&&/[^aeiouy][aeiou][bcdfgklmnprstvz]$/.test(v)) ? v+v.slice(-1) : v }
+function ING(v){ if(/ing$/.test(v))return v; if(/ie$/.test(v))return v.slice(0,-2)+"ying"; if(/[^aeiouy]e$/.test(v))return v.slice(0,-1)+"ing"; return dbl(v)+"ing" }
+function ED(v){ if(/ed$/.test(v))return v; if(/e$/.test(v))return v+"d"; if(/[^aeiouy]y$/.test(v))return v.slice(0,-1)+"ied"; return dbl(v)+"ed" }
+
+/* ============ phonotactics: can a human say it? ============ */
+const OKEND=/(ck|ch|sh|th|ng|nk|nd|nt|st|sp|sk|ld|lk|lm|lp|lt|mp|mb|rd|rk|rl|rm|rn|rt|rb|ft|pt|ss|ll|ff|zz|tch|dge)$/;
+const OK2ONSET=/^(bl|br|cl|cr|dr|dl|fl|fr|gl|gr|kl|kr|pl|pr|sk|sp|st|tr|tl|th|ch|sh|ck|sl|sn|sm|sw|tw)$/;
+const COMMON=new Set(ADJ.concat(VERB,["fiver","sunder","tender","wonder","wander","hunter","banter","canter","winter","splinter","blister","thunder","slither","whither","wither","gather","mother","bother","brother","other","rather","lather","feather","weather","whether","leather","better","letter","litter","matter","mutter","butter","batter","bitter","tatter","twitter","summer","hammer","hammock","hillock","bullock","paddock","mattock","little","brittle","bottle","battle","cattle","kettle","settle","rattle","tattle","nettle","mettle","fiddle","riddle","middle","muddle","puddle","paddle","saddle","meddle","candle","handle","bundle","dwindle","kindle","spindle","mantle","gentle","nimbly","dimly","grimly","sickly","prickly","fickle","pickle","tickle","buckle","chuckle","knuckle","suckle","truckle","gaggle","giggle","goggle","haggle","juggle","toggle","wiggle","waggle","boggle","bungle","jungle","mingle","single","tingle","dangle","jangle","tangle","wrangle","gurgle","burble","warble","marble","garble","rumble","fumble","humble","jumble","mumble","tumble","bumble","nimble","thimble","amble","ramble","gamble","scramble","tremble","assemble","gander","yonder","ponder","cinder","tinder","render","fender","mender","slender","blunder","flounder","founder","powder","chowder","louder","prouder","tumbler","rambler","grumbler","stumble","crumble","clamber","chamber","timber","limber","lumber","amber","antler","angler","tingly","wobbly","knobbly","bubbly","stubbly","scrabble","dabble","babble","gabble","rabble","nibble","dribble","scribble","quibble","wobble","hobble","cobble","gobble","squabble"]));
+function pronounceable(w){
+  if(w.length<5||w.length>10) return false;
+  if(!/[aeiouy]/.test(w)) return false;
+  if(COMMON.has(w)) return false;                          // it has to be a *new* word
+  if(syllables(w).length<2) return false;                  // one-beat words collide with real English
+  if(/[aeiou]{3,}/.test(w)) return false;                  // no vowel pileups
+  if(/([aiu])\1/.test(w)) return false;                    // uu, ii, aa
+  if(/(.)\1\1/.test(w)) return false;
+  if(/[^aeiouy]{4,}/.test(w)) return false;                // no consonant thickets
+  const mid=w.match(/[aeiouy]([^aeiouy]{3})[aeiouy]/);
+  if(mid&&!(/^[lmnrs]/.test(mid[1])&&OK2ONSET.test(mid[1].slice(1)))) return false;
+  if(/[ptkbdg][ptkbdgzvj]/.test(w)&&!/(ct|ck|pt)/.test(w)) return false;  // stop jammed on stop
+  if(/[szh][szhj]/.test(w)) return false;                  // sibilant pileup
+  if(/[^aeiouy]{2,}$/.test(w)&&!OKEND.test(w)) return false;
+  if(/[aiu]$/.test(w)) return false;                       // English words rarely end here
+  const digs=(w.match(/[aeiou]{2}/g)||[]).length;
+  if(digs>=2&&w.length>8) return false;                    // too many diphthongs to hold in the mouth
+  return true;
+}
+function assemble(rr){
+  const on = rr()<0.55 ? pick(rr,FAVE) : pick(rr,ONSETS);
+  let w = on + pick(rr,NUC) + pick(rr,CODA);
+  if(rr()<0.72) w += pick(rr,MEDIAL) + pick(rr,NUC) + (rr()<.5?pick(rr,CODA):"");
+  if(rr()<0.62){
+    const t=pick(rr,TAIL);
+    const vEnd=/[aeiouy]$/.test(w), vStart=/^[aeiouy]/.test(t);
+    if(!(vEnd&&vStart) && w.slice(-1)!==t.charAt(0)) w+=t;
+    else if(vEnd&&vStart) w=w.slice(0,-1)+t;
+  }
+  return w.replace(/([b-df-hj-np-tv-z])\1\1+/g,"$1$1");
+}
+
+/* ============ the definer ============ */
+function coin(){
+  const seed=Math.floor(Math.random()*1e9).toString(36)+Math.floor(Math.random()*1e9).toString(36);
+  const rr=rngFor(seed);
+  if(rr()<0.5){
+    for(let i=0;i<40;i++){
+      const bank = rr()<0.5 ? ADJ : VERB;
+      const a=pick(rr,bank), b=pick(rr,bank);
+      if(a===b) continue;
+      const out=blend(a,b);
+      if(out&&pronounceable(out)) return out;
+    }
+  }
+  for(let i=0;i<90;i++){ const w=assemble(rr); if(pronounceable(w)) return w }
+  for(let i=0;i<60;i++){
+    const bank = rr()<0.5 ? ADJ : VERB;
+    const out=blend(pick(rr,bank),pick(rr,bank));
+    if(out&&pronounceable(out)) return out;
+  }
+  return "slumbrick";
+}
+
+function describe(word){
+  const w=word.toLowerCase();
+  const r=rngFor("def:"+w);
+  const t=texture(w);
+  // find a plausible parent pair for this exact word, if one exists
+  let parents=null;
+  const bankTry=[ADJ,VERB];
+  outer: for(const bank of bankTry){
+    for(const a of bank){ for(const b of bank){ if(a!==b && blend(a,b)===w){parents=[a,b,bank===ADJ?"adj":"verb"];break outer} } }
+  }
+  let pos,def,usage;
+  if(parents){
+    const [a,b,kind]=parents;
+    if(kind==="adj"){
+      pos="adjective";
+      def=pick(r,[
+        `${cap(a)} and ${b} at the same time — usually rather more of the first than the second.`,
+        `So ${a} that it has come out the other side as ${b}.`,
+        `${cap(a)}, but with the unmistakable air of something ${b}.`,
+        `Neither properly ${a} nor properly ${b}, and quite pleased about it.`
+      ]);
+      usage=pick(r,[
+        `"Don't take the ${w} one," said the ${pick(r,BEASTS)}, "it never comes back the same."`,
+        `He arrived ${pick(r,TIMES)}, looking ${w} and asking after the cheese.`,
+        `The whole hedgerow had gone ${w} again, which nobody had authorised.`
+      ]);
+    } else {
+      pos="verb";
+      def=pick(r,[
+        `To ${a} and ${b} in one motion, generally on purpose.`,
+        `To ${a} whilst loudly pretending to ${b}.`,
+        `To ${b} so badly that it becomes a species of ${ING(a)}.`,
+        `To ${a} in the way a thing does when it would rather ${b}.`
+      ]);
+      usage=pick(r,[
+        `The ${pick(r,BEASTS)} had been ${ING(w)} ${pick(r,PLACES)} since Thursday.`,
+        `"Kindly do not ${w} at the table," said Alice, who had learned this the hard way.`,
+        `It ${ED(w)} once, ${pick(r,MANNER)}, and was not spoken of again.`
+      ]);
+    }
+  } else {
+    const kinds=["noun","verb","adjective"];
+    const bias = t.spike>0.42 ? (r()<.6?"verb":"noun") : (t.plump>0.42 ? (r()<.55?"noun":"adjective") : pick(r,kinds));
+    pos=/y$|ish$|ous$|some$/.test(w) ? "adjective" : bias;
+    if(pos==="noun"){
+      def=pick(r,[
+        `A small ${pick(r,ADJ)} thing that lives ${pick(r,PLACES)} and is only ever noticed ${pick(r,TIMES)}.`,
+        `The particular silence that follows a ${pick(r,VERB)}. Collectors prize the ${pick(r,ADJ)} ones.`,
+        `A ${pick(r,ADJ)} creature, roughly the size of an apology, known to ${pick(r,VERB)} when startled.`,
+        `The thing you were about to say. Plural: also ${w}.`
+      ]);
+      usage=pick(r,[`There was a ${w} ${pick(r,PLACES)}, and everyone agreed not to mention it.`,
+        `"That," said the ${pick(r,BEASTS)}, "is the third ${w} this week."`,
+        `She kept a ${w} in her pocket for luck, and it worked ${pick(r,TIMES)}.`]);
+    } else if(pos==="verb"){
+      def=pick(r,[
+        `To ${pick(r,VERB)} ${pick(r,MANNER)}, especially when nobody has asked you to.`,
+        `To move ${pick(r,PLACES)} in a ${pick(r,ADJ)} fashion, making the noise as you go.`,
+        `To ${pick(r,VERB)} and ${pick(r,VERB)} at once, which is harder than it sounds.`
+      ]);
+      usage=pick(r,[`The ${pick(r,BEASTS)} ${ED(w)} ${pick(r,PLACES)} and would not be reasoned with.`,
+        `"Stop ${ING(w)}," said Alice, "it makes the cutlery nervous."`,
+        `They ${w} every year ${pick(r,TIMES)}, and call it tradition.`]);
+    } else {
+      def=pick(r,[
+        `${cap(pick(r,ADJ))} in the manner of something that has been ${pick(r,VERB).replace(/e$/,"")}ing all afternoon.`,
+        `Of a thing: ${pick(r,ADJ)} enough to notice, not ${pick(r,ADJ)} enough to mention.`,
+        `Describing the exact feeling of being ${pick(r,ADJ)} ${pick(r,PLACES)}.`
+      ]);
+      usage=pick(r,[`It was a ${w} sort of morning, all told.`,
+        `"You look ${w}," said the ${pick(r,BEASTS)}, and meant it kindly.`,
+        `Nothing is so ${w} as a ${pick(r,BEASTS)} that has changed its mind.`]);
+    }
+  }
+  const etym=`First attested 1871 · ${pick(r,DIALECTS)} dialect, from ${pick(r,ROOTS)}.`;
+  return {word:w,pos:pos,pron:"\\ "+respell(w)+" \\",def:def,usage:usage,etym:etym,plate:(hashStr(w)%888)+11};
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+/* ============ the engraver ============ */
+/* six body plans, so two words never make the same animal */
+const PLANS=[
+/*0 grub   */{scale:1.15,fx:1.95,fy:0.70,neck:0.10,neckSpread:0.15,head:0.44,legs:[6,8],legLen:0.32,legW:0.8,wings:0.02,horns:0.20,spines:0.30,tail:0.30,eyes:[2,4],snout:0.25},
+/*1 stalk  */{scale:0.92,fx:0.80,fy:1.20,neck:1.70,neckSpread:0.40,head:0.42,legs:[2,2],legLen:1.35,legW:0.7,wings:0.06,horns:0.55,spines:0.05,tail:0.45,eyes:[1,2],snout:0.55},
+/*2 lump   */{scale:1.20,fx:1.25,fy:1.05,neck:0.45,neckSpread:0.40,head:0.62,legs:[4,4],legLen:0.50,legW:1.1,wings:0.10,horns:0.60,spines:0.10,tail:0.55,eyes:[2,2],snout:0.35},
+/*3 serpent*/{scale:1.05,fx:2.10,fy:0.62,neck:1.45,neckSpread:0.65,head:0.36,legs:[0,2],legLen:0.45,legW:0.75,wings:0.06,horns:0.30,spines:0.55,tail:1.00,eyes:[2,2],snout:0.60},
+/*4 moth   */{scale:0.86,fx:0.95,fy:1.10,neck:0.30,neckSpread:0.20,head:0.52,legs:[2,4],legLen:0.85,legW:0.6,wings:1.00,horns:0.95,spines:0.02,tail:0.12,eyes:[2,2],snout:0.10},
+/*5 urchin */{scale:1.05,fx:1.10,fy:1.00,neck:0.32,neckSpread:0.30,head:0.50,legs:[6,6],legLen:0.58,legW:0.8,wings:0.05,horns:0.70,spines:1.00,tail:0.35,eyes:[1,3],snout:0.15}
+];
+const canvas=document.getElementById("beast");
+const ctx=canvas.getContext("2d");
+let animHandle=null;
+
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+
+function smoothPath(pts){
+  const p=new Path2D(), n=pts.length;
+  p.moveTo((pts[0][0]+pts[n-1][0])/2,(pts[0][1]+pts[n-1][1])/2);
+  for(let i=0;i<n;i++){const c=pts[i],x=pts[(i+1)%n];p.quadraticCurveTo(c[0],c[1],(c[0]+x[0])/2,(c[1]+x[1])/2)}
+  p.closePath();return p;
+}
+function blob(cx,cy,rad,fx,fy,r,wobble,lobes){
+  const pts=[];
+  const f1=lobes,f2=lobes+2+Math.floor(r()*3),p1=r()*TAU,p2=r()*TAU;
+  for(let i=0;i<72;i++){
+    const a=i/72*TAU;
+    const rr=rad*(1+wobble*Math.sin(a*f1+p1)+wobble*0.6*Math.sin(a*f2+p2));
+    pts.push([cx+Math.cos(a)*rr*fx, cy+Math.sin(a)*rr*fy]);
+  }
+  return {path:smoothPath(pts),pts:pts,at:(a)=>{
+    const rr=rad*(1+wobble*Math.sin(a*f1+p1)+wobble*0.6*Math.sin(a*f2+p2));
+    return [cx+Math.cos(a)*rr*fx, cy+Math.sin(a)*rr*fy];
+  }};
+}
+function wing(x,y,len,dir,droop,r){
+  // shoulder -> swept tip -> three scallops back to the body
+  const p=new Path2D(), tipx=x+dir*len*1.15, tipy=y-len*0.55+droop*len;
+  p.moveTo(x,y);
+  p.quadraticCurveTo(x+dir*len*0.55,y-len*0.92,tipx,tipy);
+  const marks=[[0.72,0.34],[0.46,0.30],[0.20,0.24]];
+  let px=tipx,py=tipy;
+  for(const [f,d] of marks){
+    const nx=x+dir*len*1.15*f, ny=y+len*(0.10+d*0.9);
+    p.quadraticCurveTo((px+nx)/2+dir*len*0.10,(py+ny)/2+len*0.22,nx,ny);
+    px=nx;py=ny;
+  }
+  p.quadraticCurveTo((px+x)/2,y+len*0.16,x,y);
+  p.closePath();
+  return {path:p,pts:[[x,y],[tipx,tipy],[x+dir*len*1.15*0.2,y+len*0.32]]};
+}
+function limb(x1,y1,x2,y2,x3,y3,w1,w2){
+  // tapered 2-segment limb as a filled polygon
+  const p=new Path2D();
+  const ang1=Math.atan2(y2-y1,x2-x1), ang2=Math.atan2(y3-y2,x3-x2);
+  const n1x=-Math.sin(ang1)*w1, n1y=Math.cos(ang1)*w1;
+  const n2x=-Math.sin(ang2)*w2, n2y=Math.cos(ang2)*w2;
+  p.moveTo(x1+n1x,y1+n1y);
+  p.quadraticCurveTo(x2+n1x*.7+n2x*.7,y2+n1y*.7+n2y*.7,x3+n2x,y3+n2y);
+  p.lineTo(x3-n2x,y3-n2y);
+  p.quadraticCurveTo(x2-n1x*.7-n2x*.7,y2-n1y*.7-n2y*.7,x1-n1x,y1-n1y);
+  p.closePath();return p;
+}
+
+function draw(word,animate){
+  if(animHandle)cancelAnimationFrame(animHandle);
+  const INK=tok("--ink"), PAPER=tok("--paper-2"), ACC=tok("--verdigris");
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=canvas.clientWidth||420, H=canvas.clientHeight||360;
+  if(!W||!H)return;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const r=rngFor("beast:"+word.toLowerCase());
+  const t=texture(word);
+  const S=Math.min(W,H);
+  const cx=W*.5;
+  const groundY=H*0.86;
+
+  const B={x0:1e9,y0:1e9,x1:-1e9,y1:-1e9};
+  const mark=(x,y)=>{if(x<B.x0)B.x0=x;if(x>B.x1)B.x1=x;if(y<B.y0)B.y0=y;if(y>B.y1)B.y1=y};
+  const markAll=ps=>ps.forEach(p=>mark(p[0],p[1]));
+
+  /* --- pick a body plan: creatures should differ in kind, not in slider --- */
+  const pool=[];
+  if(t.plump>0.32) pool.push(0,0,2,2);
+  if(t.spike>0.32) pool.push(5,5,1);
+  if(t.slick>0.32) pool.push(3,3,4);
+  pool.push(0,1,2,3,4,5);
+  const plan=pool[Math.floor(r()*pool.length)];
+  const P=PLANS[plan];
+
+  const bodyR=S*(0.115+0.045*t.plump)*P.scale;
+  const wob=0.05+0.16*t.spike;
+  const nLegs=P.legs[0]+2*Math.floor(r()*((P.legs[1]-P.legs[0])/2+1)); // always a matched pair
+  const standH=nLegs?S*0.085*P.legLen*(0.75+r()*0.6):0;
+  const cy=groundY-standH-bodyR*P.fy*0.88;
+
+  const body=blob(cx,cy,bodyR,P.fx,P.fy,r,wob,2+Math.floor(r()*3));
+  const shapes=[body.path], details=[];
+  markAll(body.pts);
+
+  // head, on a neck of the plan's length
+  const side=r()<.5?-1:1;
+  const neckA=-Math.PI/2+side*P.neckSpread*(0.5+r());
+  const neckLen=bodyR*P.neck*(0.7+r()*0.7);
+  const anchor=body.at(neckA);
+  const hx=anchor[0]+Math.cos(neckA)*neckLen, hy=anchor[1]+Math.sin(neckA)*neckLen;
+  const headR=bodyR*P.head*(0.85+r()*0.35);
+  const head=blob(hx,hy,headR,1.0+0.3*t.spike,0.92,r,wob*0.7,3);
+  if(neckLen>bodyR*0.25)
+    shapes.push(limb(anchor[0],anchor[1],(anchor[0]+hx)/2,(anchor[1]+hy)/2,hx,hy,bodyR*0.26,headR*0.60));
+  shapes.push(head.path);
+  markAll(head.pts);
+
+  // snout
+  if(r()<P.snout){
+    const sl=headR*(0.5+r()*0.6), sa=side>0?0.18:Math.PI-0.18;
+    const ex=hx+Math.cos(sa)*sl*1.25, ey=hy+Math.sin(sa)*sl*0.5+headR*0.16;
+    shapes.push(limb(hx,hy+headR*0.14,hx+Math.cos(sa)*sl*0.65,hy+headR*0.18,ex,ey,headR*0.34,headR*0.15));
+    mark(ex,ey);
+  }
+
+  // legs, all reaching the same ground
+  for(let i=0;i<nLegs;i++){
+    const f=nLegs===1?0.5:i/(nLegs-1);
+    const a=Math.PI*(0.26+0.48*f);
+    const p0=body.at(a);
+    const fy2=groundY-r()*S*0.010;
+    const kx=p0[0]+(r()-0.5)*bodyR*0.45;
+    const ky=p0[1]+(fy2-p0[1])*(0.46+r()*0.18);
+    const fx2=p0[0]+(r()-0.5)*bodyR*0.55;
+    shapes.push(limb(p0[0],p0[1],kx,ky,fx2,fy2,bodyR*0.14*P.legW,bodyR*0.06*P.legW));
+    const foot=new Path2D();
+    foot.ellipse(fx2,fy2,bodyR*0.16,bodyR*0.065,0,0,TAU);
+    shapes.push(foot);
+    mark(fx2-bodyR*0.2,fy2+bodyR*0.08); mark(fx2+bodyR*0.2,fy2);
+    if(t.spike>0.38){
+      for(let c=0;c<3;c++){const ca=fx2+(c-1)*bodyR*0.11;
+        const cp=new Path2D();cp.moveTo(ca,fy2);cp.lineTo(ca+(c-1)*bodyR*0.06,fy2+bodyR*0.11);details.push(cp)}
+      mark(fx2,fy2+bodyR*0.13);
+    }
+  }
+
+  // tail
+  if(r()<P.tail){
+    const dir=-side;
+    const ta=side>0?Math.PI*0.88:Math.PI*0.12;
+    const p0=body.at(ta);
+    const tl=S*(0.07+r()*0.11)*(1+P.tail);
+    const ex=p0[0]+dir*tl, ey=p0[1]-tl*(0.10+r()*0.60);
+    shapes.push(limb(p0[0],p0[1],p0[0]+dir*tl*0.70,p0[1]+tl*0.14,ex,ey,bodyR*0.16,bodyR*0.030));
+    mark(ex,ey);
+  }
+
+  // horns / antennae
+  if(r()<P.horns){
+    const nHorn=2*(1+Math.floor(r()*(plan===5?2:1.4)));
+    for(let i=0;i<nHorn;i++){
+      const a=-Math.PI/2+(i%2?1:-1)*(0.30+0.36*Math.floor(i/2));
+      const p0=head.at(a);
+      const hl=headR*(0.7+r()*1.5), curl=(r()-.5)*hl*0.6;
+      const ex=p0[0]+Math.cos(a)*hl+curl, ey=p0[1]+Math.sin(a)*hl-hl*0.20;
+      shapes.push(limb(p0[0],p0[1],p0[0]+Math.cos(a)*hl*0.6,p0[1]+Math.sin(a)*hl*0.6,ex,ey,headR*0.16,headR*0.022));
+      mark(ex,ey);
+    }
+  }
+
+  // spines along the back
+  if(r()<P.spines){
+    const nSp=4+Math.floor(r()*6);
+    for(let i=0;i<nSp;i++){
+      const a=Math.PI*(1.10+0.80*(i/(nSp-1)));
+      const p0=body.at(a), sl=bodyR*(0.18+r()*0.30);
+      shapes.push(limb(p0[0],p0[1],p0[0]+Math.cos(a)*sl*0.5,p0[1]+Math.sin(a)*sl*0.5,
+        p0[0]+Math.cos(a)*sl,p0[1]+Math.sin(a)*sl,bodyR*0.075,bodyR*0.008));
+      mark(p0[0]+Math.cos(a)*sl,p0[1]+Math.sin(a)*sl);
+    }
+  }
+
+  // wings
+  if(r()<P.wings){
+    const wl=S*(0.11+r()*0.08)*(plan===4?1.6:1), droop=r()*0.14;
+    for(const d of [-1,1]){
+      const wg=wing(cx+d*bodyR*0.55,cy-bodyR*P.fy*0.42,wl,d,droop,r);
+      shapes.push(wg.path); markAll(wg.pts);
+    }
+  }
+
+  // eyes
+  const nEye=P.eyes[0]+Math.floor(r()*(P.eyes[1]-P.eyes[0]+1));
+  const eyes=[], eyeR=headR*(0.19+r()*0.13)*(nEye>2?0.78:1);
+  for(let i=0;i<nEye;i++){
+    const spread=nEye===1?0:(i/(nEye-1)-0.5)*1.2;
+    eyes.push([hx+spread*headR*0.92, hy-headR*0.12+(r()-.5)*headR*0.14, eyeR]);
+  }
+  mark(B.x0,groundY+bodyR*0.16);
+
+  /* --- lighting + hatching --- */
+  const la=-Math.PI*(0.28+r()*0.44), ld=S*(0.42+r()*0.18);
+  const LX=cx+Math.cos(la)*ld, LY=cy+Math.sin(la)*ld, RANGE=S*(0.80+r()*0.30);
+  const lit=(x,y)=>{
+    const d=Math.hypot(x-LX,y-LY);
+    let v=1-d/RANGE;
+    v+= (Math.sin(x*0.13)*Math.cos(y*0.11))*0.05;
+    return v;
+  };
+  const silo=new Path2D();
+  shapes.forEach(s=>silo.addPath(s));
+
+  function hatch(angle,spacing,thresh){
+    const out=[], dx=Math.cos(angle), dy=Math.sin(angle), nx=-dy, ny=dx;
+    const diag=Math.hypot(W,H)*0.75;
+    for(let o=-diag;o<diag;o+=spacing){
+      const ox=cx+nx*o, oy=cy+ny*o;
+      let start=null;
+      for(let s=-diag;s<=diag;s+=3.2){
+        const x=ox+dx*s, y=oy+dy*s;
+        if(lit(x,y)<thresh){ if(!start) start=[x,y]; }
+        else if(start){ if(Math.hypot(x-start[0],y-start[1])>2) out.push([start,[x,y]]); start=null; }
+      }
+      if(start) out.push([start,[ox+dx*diag,oy+dy*diag]]);
+    }
+    return out;
+  }
+  const segs=[].concat(
+    hatch(-0.62,6.2,0.86),
+    hatch(-0.62,4.4,0.66),
+    hatch(0.95,5.4,0.38),
+    hatch(-0.62,2.9,0.16)
+  );
+  for(let i=segs.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[segs[i],segs[j]]=[segs[j],segs[i]]}
+
+  /* --- fit the whole creature into the frame --- */
+  const padX=W*0.05, padT=H*0.05, padB=H*0.06;
+  const bw=Math.max(1,B.x1-B.x0), bh=Math.max(1,B.y1-B.y0);
+  const sc=Math.min((W-2*padX)/bw,(H-padT-padB)/bh,1.2);
+  const tx=W/2-(B.x0+bw/2)*sc;
+  const ty=padT-B.y0*sc+((H-padT-padB)-bh*sc)/2;
+  const enter=()=>{ctx.save();ctx.translate(tx,ty);ctx.scale(sc,sc)};
+  const lw=v=>Math.max(0.55,v)/sc;
+
+  // base fill so hatching reads as tone, not outline
+  enter(); ctx.fillStyle=PAPER; ctx.fill(silo); ctx.restore();
+
+  // ground
+  enter();
+  ctx.strokeStyle=INK;ctx.globalAlpha=0.30;ctx.lineWidth=lw(1);
+  ctx.setLineDash([1/sc,5/sc]);
+  ctx.beginPath();ctx.ellipse(cx,groundY+bodyR*0.10,Math.max(bodyR*1.5,S*0.26),S*0.020,0,0,TAU);ctx.stroke();
+  ctx.restore();
+
+  // outlines
+  enter();
+  ctx.strokeStyle=INK;ctx.lineJoin="round";ctx.lineCap="round";
+  ctx.lineWidth=lw(S*0.0052);
+  shapes.forEach(s=>ctx.stroke(s));
+  ctx.lineWidth=lw(S*0.0034);
+  details.forEach(s=>ctx.stroke(s));
+  ctx.restore();
+
+  const drawSegs=(from,to)=>{
+    enter();ctx.clip(silo);
+    ctx.strokeStyle=INK;ctx.lineWidth=lw(S*0.0021);ctx.globalAlpha=.80;ctx.lineCap="round";
+    ctx.beginPath();
+    for(let i=from;i<to;i++){const s=segs[i];ctx.moveTo(s[0][0],s[0][1]);ctx.lineTo(s[1][0],s[1][1])}
+    ctx.stroke();ctx.restore();
+  };
+  const finish=()=>{
+    enter();
+    // re-outline body and head so the hatching never muddies the silhouette
+    ctx.strokeStyle=INK;ctx.lineJoin="round";ctx.lineWidth=lw(S*0.0052);
+    ctx.stroke(body.path);ctx.stroke(head.path);
+    for(const[ex,ey,er]of eyes){
+      ctx.fillStyle=PAPER;ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.fill();
+      ctx.fillStyle=ACC;ctx.globalAlpha=.42;ctx.beginPath();ctx.arc(ex,ey,er*0.88,0,TAU);ctx.fill();ctx.globalAlpha=1;
+      ctx.strokeStyle=INK;ctx.lineWidth=lw(S*0.0040);ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.stroke();
+      ctx.fillStyle=INK;ctx.beginPath();ctx.arc(ex+er*0.14,ey+er*0.08,er*0.46,0,TAU);ctx.fill();
+      ctx.fillStyle=PAPER;ctx.beginPath();ctx.arc(ex-er*.20,ey-er*.26,er*.17,0,TAU);ctx.fill();
+    }
+    ctx.restore();
+  };
+
+  const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!animate||reduce){drawSegs(0,segs.length);finish();return}
+  let k=0;const per=Math.max(14,Math.ceil(segs.length/46));
+  (function step(){
+    const next=Math.min(segs.length,k+per);
+    drawSegs(k,next);k=next;
+    if(k<segs.length){animHandle=requestAnimationFrame(step)}else{finish()}
+  })();
+}
+
+/* ============ page wiring ============ */
+const els={word:document.getElementById("word"),pron:document.getElementById("pron"),
+  pos:document.getElementById("pos"),def:document.getElementById("def"),
+  usage:document.getElementById("usage"),etym:document.getElementById("etym"),
+  plateno:document.getElementById("plateno")};
+let current=null;
+
+function setLetters(w){
+  els.word.textContent="";
+  [...w].forEach((ch,i)=>{
+    const s=document.createElement("span");
+    s.textContent=ch;
+    els.word.appendChild(s);
+    setTimeout(()=>s.classList.add("in"),40+i*32);
+  });
+}
+
+function show(word,opts){
+  opts=opts||{};
+  const d=describe(word);
+  current=Object.assign({},d,opts.override||{});
+  setLetters(current.word);
+  els.pron.textContent=current.pron;
+  els.pos.textContent=current.pos;
+  els.def.textContent=current.def;
+  els.usage.textContent=current.usage||"";
+  els.usage.style.display=current.usage?"":"none";
+  els.etym.textContent=current.etym;
+  els.plateno.textContent=String(current.plate).padStart(3,"0");
+  draw(current.word,true);
+  try{history.replaceState(null,"","#w="+encodeURIComponent(current.word))}catch(e){}
+}
+
+function clean(s){return (s||"").toLowerCase().replace(/[^a-z-]/g,"").slice(0,20)}
+
+document.getElementById("coin").addEventListener("click",()=>show(coin()));
+document.getElementById("own").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){const v=clean(e.target.value);if(v.length>=2){show(v);e.target.blur()}}
+});
+document.getElementById("own").addEventListener("change",e=>{
+  const v=clean(e.target.value);if(v.length>=2)show(v);
+});
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>show(c.dataset.w)));
+
+/* toast + copy */
+const toastEl=document.getElementById("toast");let toastT=null;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove("on"),1900)}
+async function copy(text,ok){
+  try{await navigator.clipboard.writeText(text);toast(ok)}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");toast(ok)}catch(e2){toast("Couldn't reach the clipboard — select and copy by hand.")}
+    ta.remove();
+  }
+}
+document.getElementById("copylink").addEventListener("click",()=>{
+  copy(location.href.split("#")[0]+"#w="+encodeURIComponent(current.word),"Link copied.");
+});
+document.getElementById("copytext").addEventListener("click",()=>{
+  const c=current;
+  const txt=`${c.word} ${c.pron} ${c.pos}\n${c.def}\n${c.usage?c.usage+"\n":""}\nCoined at ${location.href.split("#")[0]}#w=${encodeURIComponent(c.word)}`;
+  copy(txt,"Specimen copied.");
+});
+
+/* ---------- the ode ---------- */
+const GLOSS={
+  brillig:["Humpty Dumpty, to Alice","\"Four o'clock in the afternoon — the time when you begin broiling things for dinner.\""],
+  slithy:["Humpty Dumpty, to Alice","\"Lithe and slimy. Lithe is the same as active. You see it's like a portmanteau — there are two meanings packed up into one word.\""],
+  toves:["Humpty Dumpty, to Alice","\"Something like badgers, something like lizards, and something like corkscrews. They make their nests under sundials, and they live on cheese.\""],
+  gyre:["Humpty Dumpty, to Alice","\"To go round and round like a gyroscope.\""],
+  gimble:["Humpty Dumpty, to Alice","\"To make holes like a gimlet.\""],
+  wabe:["Humpty Dumpty, to Alice","\"The grass plot round a sundial. It's called a wabe because it goes a long way before it, and a long way behind it.\""],
+  mimsy:["Humpty Dumpty, to Alice","\"Flimsy and miserable. There's another portmanteau for you.\""],
+  borogoves:["Humpty Dumpty, to Alice","\"A thin shabby-looking bird with its feathers sticking out all round — something like a live mop.\""],
+  mome:["Humpty Dumpty, hedging","\"I think it's short for 'from home' — meaning that they'd lost their way. But I'm not certain about that one.\""],
+  raths:["Humpty Dumpty, to Alice","\"A sort of green pig.\""],
+  outgrabe:["Humpty Dumpty, to Alice","\"Outgribing is something between bellowing and whistling, with a kind of sneeze in the middle.\""],
+  Jabberwock:["Carroll, later, to a class of schoolgirls","From the Anglo-Saxon 'wocer' (offspring or fruit) and 'jabber' (excited discussion) — thus, roughly, the result of much excited discussion."],
+  Jubjub:["Coined in the poem","A desperate bird that lives in perpetual passion. It turns up again, still alarming, in <em>The Hunting of the Snark</em>."],
+  frumious:["Carroll, in his preface to the Snark","Fuming and furious, blended. Carroll's advice: if you lean equally toward both, you will say 'frumious'."],
+  Bandersnatch:["Coined in the poem","A swift, ill-tempered creature with a long neck and snapping jaws. Also reappears in <em>The Snark</em>, still unpleasant."],
+  vorpal:["Coined in the poem","Never defined. Carroll declined to explain it. It has meant 'deadly and keen' to everyone ever since, which is how words happen."],
+  manxome:["Coined in the poem","Fearsome, with something Manx in it. Possibly monstrous, possibly just from the Isle of Man."],
+  Tumtum:["Coined in the poem","A tree. The word was Victorian slang for the sound of a stringed instrument, which makes it a pleasant place to rest."],
+  uffish:["Carroll, in a letter","\"A state of mind when the voice is gruffish, the manner roughish, and the temper huffish.\""],
+  whiffling:["Older word, borrowed","Real English: to blow in puffs, to move with a light shifting sound. Carroll picked it up rather than inventing it."],
+  tulgey:["Coined in the poem","Never defined. Thick, dark, dense — everyone agrees, no one can say why."],
+  burbled:["Carroll, in a letter","He said he could give no account of it, though he thought it might be a blend of bleat, murmur and warble."],
+  "snicker-snack":["Coined in the poem","The sound of a vorpal blade doing its work. Related to 'snickersnee', a real word for a large knife."],
+  galumphing:["Coined in the poem","To march exultantly and heavily — triumph plus gallop. Now in the dictionary, entirely on Carroll's authority."],
+  beamish:["Older word, revived","Real, but archaic: beaming, radiantly happy. Carroll rescued it and the OED credits him with the revival."],
+  frabjous:["Coined in the poem","Fair, fabulous and joyous, all at once. The best possible kind of day."],
+  Callooh:["Coined in the poem","A shout of pure joy. Possibly from 'calloo', the Scots name for the long-tailed duck, whose call sounds like it."],
+  Callay:["Coined in the poem","The second half of the shout. One is not enough."],
+  chortled:["Coined in the poem","Chuckle plus snort. Now an ordinary English word — this is Carroll's most successful invention."]
+};
+const gw=document.getElementById("gw"),gs=document.getElementById("gs"),gt=document.getElementById("gt");
+let glossWord="slithy";
+document.querySelectorAll(".nw").forEach(b=>{
+  b.addEventListener("click",()=>{
+    const w=b.dataset.w;const g=GLOSS[w];if(!g)return;
+    document.querySelectorAll(".nw.on").forEach(o=>o.classList.remove("on"));
+    document.querySelectorAll('.nw[data-w="'+w.replace(/"/g,'')+'"]').forEach(o=>o.classList.add("on"));
+    glossWord=w;gw.textContent=w;gs.textContent=g[0];gt.innerHTML=g[1];
+  });
+});
+document.getElementById("gbtn").addEventListener("click",()=>{
+  const g=GLOSS[glossWord];
+  const w=glossWord.toLowerCase().replace(/[^a-z-]/g,"");
+  show(w,{override:{
+    word:glossWord.toLowerCase(),
+    def:g[1].replace(/<[^>]+>/g,"").replace(/^"|"$/g,""),
+    usage:"",
+    etym:"Lewis Carroll, ‘Jabberwocky’, 1871 · gloss: "+g[0]+"."
+  }});
+  document.querySelector(".plate").scrollIntoView({behavior:"smooth",block:"center"});
+});
+
+/* redraw on theme / resize */
+let rz=null;
+window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(current)draw(current.word,false)},180)});
+const mq=window.matchMedia("(prefers-color-scheme: dark)");
+(mq.addEventListener?mq.addEventListener.bind(mq,"change"):mq.addListener.bind(mq))(()=>{if(current)draw(current.word,false)});
+
+/* boot */
+const h=/[#&]w=([^&]+)/.exec(location.hash);
+const start=h?clean(decodeURIComponent(h[1])):null;
+if(start&&start.length>=2){show(start)}else{show("slithy")}
+})();
+</script>
+
+</body>
+</html>
