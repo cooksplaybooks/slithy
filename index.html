@@ -4,8 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Coin a word that does not exist yet, and watch it draw its own engraved beast.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cooksplaybooks.github.io/slithy/">
 <meta property="og:title" content="Slithy">
-<meta property="og:description" content="A foundry for words that don&#39;t exist yet - and engraved portraits of what they&#39;d be.">
+<meta property="og:description" content="Coin a word that doesn&#39;t exist yet. It draws its own beast.">
+<meta name="twitter:card" content="summary_large_image">
+<!-- TODO before sharing widely: add <meta property="og:image" content="https://cooksplaybooks.github.io/slithy/card.png"> -->
 <title>Slithy — coin a word, meet the beast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,6 +223,12 @@ canvas#beast{width:100%;height:100%;display:block}
   border-top:1px solid var(--rule);padding:26px 0 60px;text-align:center;
   color:var(--ink-2);font-size:.85rem;
 }
+.flink{
+  color:var(--verdigris);text-decoration:none;
+  border-bottom:1px dotted var(--verdigris);
+}
+.flink:hover{color:var(--madder);border-bottom-color:var(--madder)}
+.flink:focus-visible{outline:2px solid var(--verdigris);outline-offset:3px}
 .toast{
   position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
   background:var(--ink);color:var(--paper-2);padding:10px 20px;border-radius:2px;
@@ -240,7 +250,7 @@ canvas#beast{width:100%;height:100%;display:block}
 
   <header class="masthead">
     <h1 class="brand">Slithy<span class="dot">.</span></h1>
-    <p class="tagline">A foundry for words that don't exist yet — and engraved portraits of what they'd be. Every word draws its own beast, the same way, forever.</p>
+    <p class="tagline">A foundry for words that don't exist yet accompanied by their engraved portraits. Every new word draws its own beast.</p>
   </header>
 
   <section class="sec">
@@ -339,7 +349,7 @@ canvas#beast{width:100%;height:100%;display:block}
   </section>
 
   <footer class="foot">
-    <p>A <em>nonce word</em> is one coined for a single occasion. Carroll coined about twenty and we're still using four of them.</p>
+    <p>A <a class="flink" href="https://en.wikipedia.org/wiki/Nonce_word" target="_blank" rel="noopener noreferrer"><em>nonce word</em></a> is a nonsense word. Carroll coined about twenty of them and we are still using four of them!</p>
   </footer>
 </div>
 
@@ -590,7 +600,7 @@ const PLANS=[
 ];
 const canvas=document.getElementById("beast");
 const ctx=canvas.getContext("2d");
-let animHandle=null;
+let animHandle=null, pendingCleanup=null;
 
 function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 
@@ -643,7 +653,8 @@ function limb(x1,y1,x2,y2,x3,y3,w1,w2){
 }
 
 function draw(word,animate){
-  if(animHandle)cancelAnimationFrame(animHandle);
+  if(pendingCleanup){const c=pendingCleanup;pendingCleanup=null;c()}  // retire the previous reveal
+  if(animHandle){cancelAnimationFrame(animHandle);animHandle=null}
   const INK=tok("--ink"), PAPER=tok("--paper-2"), ACC=tok("--verdigris");
   const dpr=Math.min(2,window.devicePixelRatio||1);
   const W=canvas.clientWidth||420, H=canvas.clientHeight||360;
@@ -862,13 +873,32 @@ function draw(word,animate){
     ctx.restore();
   };
 
+  /* Browsers suspend requestAnimationFrame in background tabs, so an animated
+     reveal started there would stall forever. Draw instantly when hidden, and
+     keep a visibility listener plus a timer as backstops for going hidden mid-draw. */
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!animate||reduce){drawSegs(0,segs.length);finish();return}
-  let k=0;const per=Math.max(14,Math.ceil(segs.length/46));
+  if(!animate||reduce||document.hidden){drawSegs(0,segs.length);finish();return}
+
+  let k=0,done=false,backstop=null;
+  const per=Math.max(14,Math.ceil(segs.length/46));
+  const finishNow=()=>{
+    if(done)return; done=true;
+    if(animHandle){cancelAnimationFrame(animHandle);animHandle=null}
+    clearTimeout(backstop);
+    document.removeEventListener("visibilitychange",onVis);
+    pendingCleanup=null;
+    if(k<segs.length){drawSegs(k,segs.length);k=segs.length}
+    finish();
+  };
+  function onVis(){ if(!document.hidden) finishNow() }
+  document.addEventListener("visibilitychange",onVis);
+  backstop=setTimeout(finishNow,2600);
+  pendingCleanup=finishNow;
+
   (function step(){
     const next=Math.min(segs.length,k+per);
     drawSegs(k,next);k=next;
-    if(k<segs.length){animHandle=requestAnimationFrame(step)}else{finish()}
+    if(k<segs.length){animHandle=requestAnimationFrame(step)}else{finishNow()}
   })();
 }
 
@@ -928,12 +958,28 @@ async function copy(text,ok){
     ta.remove();
   }
 }
+/* The page may be served inside a sandboxed frame, where location.href is an
+   internal URL nobody else can open. Prefer the address the visitor actually sees. */
+function shareBase(){
+  let framed=true;
+  try{framed=(window.top!==window.self)}catch(e){framed=true}
+  if(framed){
+    const ref=document.referrer||"";
+    return /^https?:\/\//.test(ref)?ref.split("#")[0]:null;
+  }
+  return location.href.split("#")[0];
+}
+function wordLink(w){const b=shareBase();return b?b+"#w="+encodeURIComponent(w):null}
+
 document.getElementById("copylink").addEventListener("click",()=>{
-  copy(location.href.split("#")[0]+"#w="+encodeURIComponent(current.word),"Link copied.");
+  const link=wordLink(current.word);
+  if(link) copy(link,"Link copied.");
+  else copy(current.word,"Copied the word — paste it into the box to see this exact beast.");
 });
 document.getElementById("copytext").addEventListener("click",()=>{
-  const c=current;
-  const txt=`${c.word} ${c.pron} ${c.pos}\n${c.def}\n${c.usage?c.usage+"\n":""}\nCoined at ${location.href.split("#")[0]}#w=${encodeURIComponent(c.word)}`;
+  const c=current, link=wordLink(c.word);
+  const txt=`${c.word} ${c.pron} ${c.pos}\n${c.def}\n${c.usage?c.usage+"\n":""}`
+    +(link?`\nCoined at ${link}`:"");
   copy(txt,"Specimen copied.");
 });
 
