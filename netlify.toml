@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+
+# @napi-rs/canvas ships a native binary; it must not be bundled by esbuild
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@napi-rs/canvas"]
+  included_files = ["index.html", "fonts/**"]
+
+[[headers]]
+  for = "/card.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

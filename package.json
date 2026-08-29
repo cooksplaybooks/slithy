@@ -1,0 +1,9 @@
+{
+  "name": "slithy",
+  "private": true,
+  "type": "module",
+  "description": "A foundry for words that don't exist yet, and engraved portraits of what they'd be.",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.60"
+  }
+}

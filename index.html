@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Coin a word that does not exist yet, and watch it draw its own engraved beast.">
 
-<!-- Social preview -->
+<!-- Social preview. The edge function rewrites these per word from ?w= -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://cooksplaybooks.github.io/slithy/">
+<meta property="og:url" content="https://slithy.netlify.app/">
 <meta property="og:site_name" content="Slithy">
 <meta property="og:title" content="Slithy">
 <meta property="og:description" content="Coin a word that doesn&#39;t exist yet. It draws its own beast.">
-<meta property="og:image" content="https://cooksplaybooks.github.io/slithy/card.png">
+<meta property="og:image" content="https://slithy.netlify.app/card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
-<meta property="og:image:alt" content="An engraved creature beside the invented word flusterbeak and its dictionary definition.">
+<meta property="og:image:alt" content="An engraved creature beside an invented word and its dictionary definition.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Slithy">
 <meta name="twitter:description" content="Coin a word that doesn&#39;t exist yet. It draws its own beast.">
-<meta name="twitter:image" content="https://cooksplaybooks.github.io/slithy/card.png">
-<meta name="twitter:image:alt" content="An engraved creature beside the invented word flusterbeak and its dictionary definition.">
+<meta name="twitter:image" content="https://slithy.netlify.app/card.png">
+<meta name="twitter:image:alt" content="An engraved creature beside an invented word and its dictionary definition.">
 
 <title>Slithy — coin a word, meet the beast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -494,8 +494,10 @@ canvas#beast{width:100%;height:100%;display:block}
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script>
-(function(){
+<script id="engine">
+/* Pure engine — no DOM. The share-card server runs this exact code,
+   so a generated preview can never drift from what the browser draws. */
+(function(root){
 "use strict";
 const TAU = Math.PI*2;
 
@@ -737,11 +739,6 @@ const PLANS=[
 /*4 moth   */{scale:0.86,fx:0.95,fy:1.10,neck:0.30,neckSpread:0.20,head:0.52,legs:[2,4],legLen:0.85,legW:0.6,wings:1.00,horns:0.95,spines:0.02,tail:0.12,eyes:[2,2],snout:0.10},
 /*5 urchin */{scale:1.05,fx:1.10,fy:1.00,neck:0.32,neckSpread:0.30,head:0.50,legs:[6,6],legLen:0.58,legW:0.8,wings:0.05,horns:0.70,spines:1.00,tail:0.35,eyes:[1,3],snout:0.15}
 ];
-const canvas=document.getElementById("beast");
-const ctx=canvas.getContext("2d");
-let animHandle=null, pendingCleanup=null;
-
-function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 
 function smoothPath(pts){
   const p=new Path2D(), n=pts.length;
@@ -791,17 +788,10 @@ function limb(x1,y1,x2,y2,x3,y3,w1,w2){
   p.closePath();return p;
 }
 
-function draw(word,animate){
-  if(pendingCleanup){const c=pendingCleanup;pendingCleanup=null;c()}  // retire the previous reveal
-  if(animHandle){cancelAnimationFrame(animHandle);animHandle=null}
-  const INK=tok("--ink"), PAPER=tok("--paper-2"), ACC=tok("--verdigris");
-  const dpr=Math.min(2,window.devicePixelRatio||1);
-  const W=canvas.clientWidth||420, H=canvas.clientHeight||360;
-  if(!W||!H)return;
-  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,W,H);
-
+/* buildBeast is pure geometry: given a word and a box, work out every path,
+   every hatch segment and the transform that fits it all in frame. No canvas,
+   no DOM — so the share-card server can call it with the same result. */
+function buildBeast(word,W,H){
   const r=rngFor("beast:"+word.toLowerCase());
   const t=texture(word);
   const S=Math.min(W,H);
@@ -968,55 +958,93 @@ function draw(word,animate){
   const sc=Math.min((W-2*padX)/bw,(H-padT-padB)/bh,1.2);
   const tx=W/2-(B.x0+bw/2)*sc;
   const ty=padT-B.y0*sc+((H-padT-padB)-bh*sc)/2;
-  const enter=()=>{ctx.save();ctx.translate(tx,ty);ctx.scale(sc,sc)};
-  const lw=v=>Math.max(0.55,v)/sc;
 
+  return {shapes,details,eyes,segs,silo,body,head,sc,tx,ty,S,cx,groundY,bodyR};
+}
+
+/* Painting, split so the browser can reveal the hatching progressively while the
+   server draws it all at once. C = {ink, paper, accent}. */
+function enter(ctx,Bt){ctx.save();ctx.translate(Bt.tx,Bt.ty);ctx.scale(Bt.sc,Bt.sc)}
+function lwOf(Bt,v){return Math.max(0.55,v)/Bt.sc}
+
+function paintBase(ctx,Bt,C){
+  const S=Bt.S;
   // base fill so hatching reads as tone, not outline
-  enter(); ctx.fillStyle=PAPER; ctx.fill(silo); ctx.restore();
-
+  enter(ctx,Bt); ctx.fillStyle=C.paper; ctx.fill(Bt.silo); ctx.restore();
   // ground
-  enter();
-  ctx.strokeStyle=INK;ctx.globalAlpha=0.30;ctx.lineWidth=lw(1);
-  ctx.setLineDash([1/sc,5/sc]);
-  ctx.beginPath();ctx.ellipse(cx,groundY+bodyR*0.10,Math.max(bodyR*1.5,S*0.26),S*0.020,0,0,TAU);ctx.stroke();
+  enter(ctx,Bt);
+  ctx.strokeStyle=C.ink;ctx.globalAlpha=0.30;ctx.lineWidth=lwOf(Bt,1);
+  ctx.setLineDash([1/Bt.sc,5/Bt.sc]);
+  ctx.beginPath();ctx.ellipse(Bt.cx,Bt.groundY+Bt.bodyR*0.10,Math.max(Bt.bodyR*1.5,S*0.26),S*0.020,0,0,TAU);ctx.stroke();
   ctx.restore();
-
   // outlines
-  enter();
-  ctx.strokeStyle=INK;ctx.lineJoin="round";ctx.lineCap="round";
-  ctx.lineWidth=lw(S*0.0052);
-  shapes.forEach(s=>ctx.stroke(s));
-  ctx.lineWidth=lw(S*0.0034);
-  details.forEach(s=>ctx.stroke(s));
+  enter(ctx,Bt);
+  ctx.strokeStyle=C.ink;ctx.lineJoin="round";ctx.lineCap="round";
+  ctx.lineWidth=lwOf(Bt,S*0.0052);
+  Bt.shapes.forEach(s=>ctx.stroke(s));
+  ctx.lineWidth=lwOf(Bt,S*0.0034);
+  Bt.details.forEach(s=>ctx.stroke(s));
   ctx.restore();
+}
+function paintSegs(ctx,Bt,C,from,to){
+  enter(ctx,Bt);ctx.clip(Bt.silo);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=lwOf(Bt,Bt.S*0.0021);ctx.globalAlpha=.80;ctx.lineCap="round";
+  ctx.beginPath();
+  for(let i=from;i<to;i++){const s=Bt.segs[i];ctx.moveTo(s[0][0],s[0][1]);ctx.lineTo(s[1][0],s[1][1])}
+  ctx.stroke();ctx.restore();
+}
+function paintFinish(ctx,Bt,C){
+  const S=Bt.S;
+  enter(ctx,Bt);
+  // re-outline body and head so the hatching never muddies the silhouette
+  ctx.strokeStyle=C.ink;ctx.lineJoin="round";ctx.lineWidth=lwOf(Bt,S*0.0052);
+  ctx.stroke(Bt.body.path);ctx.stroke(Bt.head.path);
+  for(const[ex,ey,er]of Bt.eyes){
+    ctx.fillStyle=C.paper;ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.fill();
+    ctx.fillStyle=C.accent;ctx.globalAlpha=.42;ctx.beginPath();ctx.arc(ex,ey,er*0.88,0,TAU);ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle=C.ink;ctx.lineWidth=lwOf(Bt,S*0.0040);ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.stroke();
+    ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(ex+er*0.14,ey+er*0.08,er*0.46,0,TAU);ctx.fill();
+    ctx.fillStyle=C.paper;ctx.beginPath();ctx.arc(ex-er*.20,ey-er*.26,er*.17,0,TAU);ctx.fill();
+  }
+  ctx.restore();
+}
+function paintAll(ctx,Bt,C){paintBase(ctx,Bt,C);paintSegs(ctx,Bt,C,0,Bt.segs.length);paintFinish(ctx,Bt,C)}
 
-  const drawSegs=(from,to)=>{
-    enter();ctx.clip(silo);
-    ctx.strokeStyle=INK;ctx.lineWidth=lw(S*0.0021);ctx.globalAlpha=.80;ctx.lineCap="round";
-    ctx.beginPath();
-    for(let i=from;i<to;i++){const s=segs[i];ctx.moveTo(s[0][0],s[0][1]);ctx.lineTo(s[1][0],s[1][1])}
-    ctx.stroke();ctx.restore();
-  };
-  const finish=()=>{
-    enter();
-    // re-outline body and head so the hatching never muddies the silhouette
-    ctx.strokeStyle=INK;ctx.lineJoin="round";ctx.lineWidth=lw(S*0.0052);
-    ctx.stroke(body.path);ctx.stroke(head.path);
-    for(const[ex,ey,er]of eyes){
-      ctx.fillStyle=PAPER;ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.fill();
-      ctx.fillStyle=ACC;ctx.globalAlpha=.42;ctx.beginPath();ctx.arc(ex,ey,er*0.88,0,TAU);ctx.fill();ctx.globalAlpha=1;
-      ctx.strokeStyle=INK;ctx.lineWidth=lw(S*0.0040);ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.stroke();
-      ctx.fillStyle=INK;ctx.beginPath();ctx.arc(ex+er*0.14,ey+er*0.08,er*0.46,0,TAU);ctx.fill();
-      ctx.fillStyle=PAPER;ctx.beginPath();ctx.arc(ex-er*.20,ey-er*.26,er*.17,0,TAU);ctx.fill();
-    }
-    ctx.restore();
-  };
+root.SLITHY={coin,describe,texture,syllables,respell,buildBeast,paintBase,paintSegs,paintFinish,paintAll,PLANS};
+})(typeof globalThis!=="undefined"?globalThis:this);
+</script>
+
+<script id="page">
+(function(){
+"use strict";
+const {coin,describe,buildBeast,paintBase,paintSegs,paintFinish}=SLITHY;
+
+/* ============ the canvas, and the reveal animation ============ */
+const canvas=document.getElementById("beast");
+const ctx=canvas.getContext("2d");
+let animHandle=null, pendingCleanup=null;
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+
+function draw(word,animate){
+  if(pendingCleanup){const c=pendingCleanup;pendingCleanup=null;c()}  // retire the previous reveal
+  if(animHandle){cancelAnimationFrame(animHandle);animHandle=null}
+  const C={ink:tok("--ink"),paper:tok("--paper-2"),accent:tok("--verdigris")};
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=canvas.clientWidth||420, H=canvas.clientHeight||360;
+  if(!W||!H)return;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const Bt=buildBeast(word,W,H);
+  paintBase(ctx,Bt,C);
+  const segs=Bt.segs;
 
   /* Browsers suspend requestAnimationFrame in background tabs, so an animated
      reveal started there would stall forever. Draw instantly when hidden, and
      keep a visibility listener plus a timer as backstops for going hidden mid-draw. */
   const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(!animate||reduce||document.hidden){drawSegs(0,segs.length);finish();return}
+  if(!animate||reduce||document.hidden){paintSegs(ctx,Bt,C,0,segs.length);paintFinish(ctx,Bt,C);return}
 
   let k=0,done=false,backstop=null;
   const per=Math.max(14,Math.ceil(segs.length/46));
@@ -1026,8 +1054,8 @@ function draw(word,animate){
     clearTimeout(backstop);
     document.removeEventListener("visibilitychange",onVis);
     pendingCleanup=null;
-    if(k<segs.length){drawSegs(k,segs.length);k=segs.length}
-    finish();
+    if(k<segs.length){paintSegs(ctx,Bt,C,k,segs.length);k=segs.length}
+    paintFinish(ctx,Bt,C);
   };
   function onVis(){ if(!document.hidden) finishNow() }
   document.addEventListener("visibilitychange",onVis);
@@ -1036,7 +1064,7 @@ function draw(word,animate){
 
   (function step(){
     const next=Math.min(segs.length,k+per);
-    drawSegs(k,next);k=next;
+    paintSegs(ctx,Bt,C,k,next);k=next;
     if(k<segs.length){animHandle=requestAnimationFrame(step)}else{finishNow()}
   })();
 }
@@ -1071,7 +1099,14 @@ function show(word,opts){
   els.etym.textContent=current.etym;
   els.plateno.textContent=String(current.plate).padStart(3,"0");
   draw(current.word,true);
-  try{history.replaceState(null,"","#w="+encodeURIComponent(current.word))}catch(e){}
+  /* The word lives in the query string, not the hash: fragments are never sent to
+     the server, so a #w= link could never carry its own social preview. */
+  try{
+    const u=new URL(location.href);
+    u.searchParams.set("w",current.word);
+    u.hash="";
+    history.replaceState(null,"",u.pathname+u.search);
+  }catch(e){}
 }
 
 function clean(s){return (s||"").toLowerCase().replace(/[^a-z-]/g,"").slice(0,20)}
@@ -1108,7 +1143,7 @@ function shareBase(){
   }
   return location.href.split("#")[0];
 }
-function wordLink(w){const b=shareBase();return b?b+"#w="+encodeURIComponent(w):null}
+function wordLink(w){const b=shareBase();return b?b+"?w="+encodeURIComponent(w):null}
 
 document.getElementById("copylink").addEventListener("click",()=>{
   const link=wordLink(current.word);
@@ -1241,9 +1276,13 @@ window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(cur
 const mq=window.matchMedia("(prefers-color-scheme: dark)");
 (mq.addEventListener?mq.addEventListener.bind(mq,"change"):mq.addListener.bind(mq))(()=>{if(current)draw(current.word,false)});
 
-/* boot */
-const h=/[#&]w=([^&]+)/.exec(location.hash);
-const start=h?clean(decodeURIComponent(h[1])):null;
+/* boot: ?w= is canonical; #w= is honoured so links shared before the switch still resolve */
+let start=null;
+try{ start=clean(new URLSearchParams(location.search).get("w")||"") }catch(e){}
+if(!start||start.length<2){
+  const h=/[#&]w=([^&]+)/.exec(location.hash);
+  if(h){ try{ start=clean(decodeURIComponent(h[1])) }catch(e){ start=clean(h[1]) } }
+}
 if(start&&start.length>=2){show(start)}else{show("slithy")}
 })();
 </script>
