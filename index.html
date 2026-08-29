@@ -246,8 +246,14 @@ canvas#beast{width:100%;height:100%;display:block}
 }
 .gloss-w{
   font-family:var(--f-disp);font-variation-settings:var(--wonk);
-  font-weight:700;font-size:1.5rem;margin:0 0 4px;
+  font-weight:700;font-size:1.5rem;margin:0 0 5px;
 }
+.gloss-pron{
+  margin:0 0 10px;color:var(--ink-2);font-size:.92rem;
+  display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;
+}
+.gloss-pron .pos{font-style:italic;color:var(--verdigris)}
+.gloss-pron .sep{opacity:.45}
 .gloss-src{
   font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink-2);margin:0 0 12px;
@@ -385,6 +391,7 @@ canvas#beast{width:100%;height:100%;display:block}
 
     <div class="gloss" id="gloss">
       <p class="gloss-w" id="gw">slithy</p>
+      <p class="gloss-pron"><span id="gpron">\ ˈSLY-thee \</span><span class="sep">·</span><span class="pos" id="gpos">adjective</span></p>
       <p class="gloss-src" id="gs">Humpty Dumpty, to Alice</p>
       <p class="gloss-t" id="gt">"Lithe and slimy. Lithe is the same as active. You see it's like a portmanteau — there are two meanings packed up into one word."</p>
       <button class="btn ghost" id="gbtn">Illustrate it ⟶</button>
@@ -1028,37 +1035,38 @@ document.getElementById("copytext").addEventListener("click",()=>{
 
 /* ---------- the ode ---------- */
 const GLOSS={
-  brillig:["Humpty Dumpty, to Alice","\"Four o'clock in the afternoon — the time when you begin broiling things for dinner.\""],
-  slithy:["Humpty Dumpty, to Alice","\"Lithe and slimy. Lithe is the same as active. You see it's like a portmanteau — there are two meanings packed up into one word.\""],
-  toves:["Humpty Dumpty, to Alice","\"Something like badgers, something like lizards, and something like corkscrews. They make their nests under sundials, and they live on cheese.\""],
-  gyre:["Humpty Dumpty, to Alice","\"To go round and round like a gyroscope.\""],
-  gimble:["Humpty Dumpty, to Alice","\"To make holes like a gimlet.\""],
-  wabe:["Humpty Dumpty, to Alice","\"The grass plot round a sundial. It's called a wabe because it goes a long way before it, and a long way behind it.\""],
-  mimsy:["Humpty Dumpty, to Alice","\"Flimsy and miserable. There's another portmanteau for you.\""],
-  borogoves:["Humpty Dumpty, to Alice","\"A thin shabby-looking bird with its feathers sticking out all round — something like a live mop.\""],
-  mome:["Humpty Dumpty, hedging","\"I think it's short for 'from home' — meaning that they'd lost their way. But I'm not certain about that one.\""],
-  raths:["Humpty Dumpty, to Alice","\"A sort of green pig.\""],
-  outgrabe:["Humpty Dumpty, to Alice","\"Outgribing is something between bellowing and whistling, with a kind of sneeze in the middle.\""],
-  Jabberwock:["Carroll, later, to a class of schoolgirls","From the Anglo-Saxon 'wocer' (offspring or fruit) and 'jabber' (excited discussion) — thus, roughly, the result of much excited discussion."],
-  Jubjub:["Coined in the poem","A desperate bird that lives in perpetual passion. It turns up again, still alarming, in <em>The Hunting of the Snark</em>."],
-  frumious:["Carroll, in his preface to the Snark","Fuming and furious, blended. Carroll's advice: if you lean equally toward both, you will say 'frumious'."],
-  Bandersnatch:["Coined in the poem","A swift, ill-tempered creature with a long neck and snapping jaws. Also reappears in <em>The Snark</em>, still unpleasant."],
-  vorpal:["Coined in the poem","Never defined. Carroll declined to explain it. It has meant 'deadly and keen' to everyone ever since, which is how words happen."],
-  manxome:["Coined in the poem","Fearsome, with something Manx in it. Possibly monstrous, possibly just from the Isle of Man."],
-  Tumtum:["Coined in the poem","A tree. The word was Victorian slang for the sound of a stringed instrument, which makes it a pleasant place to rest."],
-  uffish:["Carroll, in a letter","\"A state of mind when the voice is gruffish, the manner roughish, and the temper huffish.\""],
-  whiffling:["Older word, borrowed","Real English: to blow in puffs, to move with a light shifting sound. Carroll picked it up rather than inventing it."],
-  tulgey:["Coined in the poem","Never defined. Thick, dark, dense — everyone agrees, no one can say why."],
-  burbled:["Carroll, in a letter","He said he could give no account of it, though he thought it might be a blend of bleat, murmur and warble."],
-  "snicker-snack":["Coined in the poem","The sound of a vorpal blade doing its work. Related to 'snickersnee', a real word for a large knife."],
-  galumphing:["Coined in the poem","To march exultantly and heavily — triumph plus gallop. Now in the dictionary, entirely on Carroll's authority."],
-  beamish:["Older word, revived","Real, but archaic: beaming, radiantly happy. Carroll rescued it and the OED credits him with the revival."],
-  frabjous:["Coined in the poem","Fair, fabulous and joyous, all at once. The best possible kind of day."],
-  Callooh:["Coined in the poem","A shout of pure joy. Possibly from 'calloo', the Scots name for the long-tailed duck, whose call sounds like it."],
-  Callay:["Coined in the poem","The second half of the shout. One is not enough."],
-  chortled:["Coined in the poem","Chuckle plus snort. Now an ordinary English word — this is Carroll's most successful invention."]
+  brillig:["Humpty Dumpty, to Alice","\"Four o'clock in the afternoon — the time when you begin broiling things for dinner.\"","\\ \u02c8BRIL-ig \\","noun"],
+  slithy:["Humpty Dumpty, to Alice","\"Lithe and slimy. Lithe is the same as active. You see it's like a portmanteau — there are two meanings packed up into one word.\"","\\ \u02c8SLY-thee \\","adjective"],
+  toves:["Humpty Dumpty, to Alice","\"Something like badgers, something like lizards, and something like corkscrews. They make their nests under sundials, and they live on cheese.\"","\\ \u02c8TOHVZ \\","noun, plural"],
+  gyre:["Humpty Dumpty, to Alice","\"To go round and round like a gyroscope.\"","\\ \u02c8GY-er \\","verb"],
+  gimble:["Humpty Dumpty, to Alice","\"To make holes like a gimlet.\"","\\ \u02c8GIM-bul \\","verb"],
+  wabe:["Humpty Dumpty, to Alice","\"The grass plot round a sundial. It's called a wabe because it goes a long way before it, and a long way behind it.\"","\\ \u02c8WAYB \\","noun"],
+  mimsy:["Humpty Dumpty, to Alice","\"Flimsy and miserable. There's another portmanteau for you.\"","\\ \u02c8MIM-zee \\","adjective"],
+  borogoves:["Humpty Dumpty, to Alice","\"A thin shabby-looking bird with its feathers sticking out all round — something like a live mop.\"","\\ \u02c8BOR-uh-gohvz \\","noun, plural"],
+  mome:["Humpty Dumpty, hedging","\"I think it's short for 'from home' — meaning that they'd lost their way. But I'm not certain about that one.\"","\\ \u02c8MOHM \\","adjective"],
+  raths:["Humpty Dumpty, to Alice","\"A sort of green pig.\"","\\ \u02c8RATHS \\","noun, plural"],
+  outgrabe:["Humpty Dumpty, to Alice","\"Outgribing is something between bellowing and whistling, with a kind of sneeze in the middle.\"","\\ owt-\u02c8GRAYB \\","verb, past"],
+  Jabberwock:["Carroll, later, to a class of schoolgirls","From the Anglo-Saxon 'wocer' (offspring or fruit) and 'jabber' (excited discussion) — thus, roughly, the result of much excited discussion.","\\ \u02c8JAB-er-wok \\","proper noun"],
+  Jubjub:["Coined in the poem","A desperate bird that lives in perpetual passion. It turns up again, still alarming, in <em>The Hunting of the Snark</em>.","\\ \u02c8JUB-jub \\","noun"],
+  frumious:["Carroll, in his preface to the Snark","Fuming and furious, blended. Carroll's advice: if you lean equally toward both, you will say 'frumious'.","\\ \u02c8FROO-mee-us \\","adjective"],
+  Bandersnatch:["Coined in the poem","A swift, ill-tempered creature with a long neck and snapping jaws. Also reappears in <em>The Snark</em>, still unpleasant.","\\ \u02c8BAN-der-snach \\","proper noun"],
+  vorpal:["Coined in the poem","Never defined. Carroll declined to explain it. It has meant 'deadly and keen' to everyone ever since, which is how words happen.","\\ \u02c8VOR-pul \\","adjective"],
+  manxome:["Coined in the poem","Fearsome, with something Manx in it. Possibly monstrous, possibly just from the Isle of Man.","\\ \u02c8MANK-sum \\","adjective"],
+  Tumtum:["Coined in the poem","A tree. The word was Victorian slang for the sound of a stringed instrument, which makes it a pleasant place to rest.","\\ \u02c8TUM-tum \\","proper noun"],
+  uffish:["Carroll, in a letter","\"A state of mind when the voice is gruffish, the manner roughish, and the temper huffish.\"","\\ \u02c8UF-ish \\","adjective"],
+  whiffling:["Older word, borrowed","Real English: to blow in puffs, to move with a light shifting sound. Carroll picked it up rather than inventing it.","\\ \u02c8WIF-ling \\","verb, participle"],
+  tulgey:["Coined in the poem","Never defined. Thick, dark, dense — everyone agrees, no one can say why.","\\ \u02c8TUL-gee \\","adjective"],
+  burbled:["Carroll, in a letter","He said he could give no account of it, though he thought it might be a blend of bleat, murmur and warble.","\\ \u02c8BUR-buld \\","verb, past"],
+  "snicker-snack":["Coined in the poem","The sound of a vorpal blade doing its work. Related to 'snickersnee', a real word for a large knife.","\\ \u02c8SNIK-er-snak \\","interjection"],
+  galumphing:["Coined in the poem","To march exultantly and heavily — triumph plus gallop. Now in the dictionary, entirely on Carroll's authority.","\\ guh-\u02c8LUM-fing \\","verb, participle"],
+  beamish:["Older word, revived","Real, but archaic: beaming, radiantly happy. Carroll rescued it and the OED credits him with the revival.","\\ \u02c8BEE-mish \\","adjective"],
+  frabjous:["Coined in the poem","Fair, fabulous and joyous, all at once. The best possible kind of day.","\\ \u02c8FRAB-jus \\","adjective"],
+  Callooh:["Coined in the poem","A shout of pure joy. Possibly from 'calloo', the Scots name for the long-tailed duck, whose call sounds like it.","\\ kuh-\u02c8LOO \\","interjection"],
+  Callay:["Coined in the poem","The second half of the shout. One is not enough.","\\ kuh-\u02c8LAY \\","interjection"],
+  chortled:["Coined in the poem","Chuckle plus snort. Now an ordinary English word — this is Carroll's most successful invention.","\\ \u02c8CHOR-tuld \\","verb, past"]
 };
-const gw=document.getElementById("gw"),gs=document.getElementById("gs"),gt=document.getElementById("gt");
+const gw=document.getElementById("gw"),gs=document.getElementById("gs"),gt=document.getElementById("gt"),
+      gpron=document.getElementById("gpron"),gpos=document.getElementById("gpos");
 let glossWord="slithy";
 document.querySelectorAll(".nw").forEach(b=>{
   b.addEventListener("click",()=>{
@@ -1066,13 +1074,18 @@ document.querySelectorAll(".nw").forEach(b=>{
     document.querySelectorAll(".nw.on").forEach(o=>o.classList.remove("on"));
     document.querySelectorAll('.nw[data-w="'+w.replace(/"/g,'')+'"]').forEach(o=>o.classList.add("on"));
     glossWord=w;gw.textContent=w;gs.textContent=g[0];gt.innerHTML=g[1];
+    gpron.textContent=g[2];gpos.textContent=g[3];
   });
 });
 document.getElementById("gbtn").addEventListener("click",()=>{
   const g=GLOSS[glossWord];
   const w=glossWord.toLowerCase().replace(/[^a-z-]/g,"");
+  // carry Carroll's own pronunciation and part of speech onto the plate,
+  // rather than letting the generator guess at a word it didn't invent
   show(w,{override:{
     word:glossWord.toLowerCase(),
+    pron:g[2],
+    pos:g[3],
     def:g[1].replace(/<[^>]+>/g,"").replace(/^"|"$/g,""),
     usage:"",
     etym:"Lewis Carroll, ‘Jabberwocky’, 1871 · gloss: "+g[0]+"."
