@@ -701,9 +701,9 @@ function describe(word){
         `A ${pick(r,ADJ)} creature, roughly the size of an apology, known to ${pick(r,VERB)} when startled.`,
         `The thing you were about to say. Plural: also ${w}.`
       ]);
-      usage=pick(r,[`There was a ${w} ${pick(r,PLACES)}, and everyone agreed not to mention it.`,
+      usage=pick(r,[`There was ${art(w)} ${w} ${pick(r,PLACES)}, and everyone agreed not to mention it.`,
         `"That," said the ${pick(r,BEASTS)}, "is the third ${w} this week."`,
-        `She kept a ${w} in her pocket for luck, and it worked ${pick(r,TIMES)}.`]);
+        `She kept ${art(w)} ${w} in her pocket for luck, and it worked ${pick(r,TIMES)}.`]);
     } else if(pos==="verb"){
       def=pick(r,[
         `To ${pick(r,VERB)} ${pick(r,MANNER)}, especially when nobody has asked you to.`,
@@ -719,7 +719,7 @@ function describe(word){
         `Of a thing: ${pick(r,ADJ)} enough to notice, not ${pick(r,ADJ)} enough to mention.`,
         `Describing the exact feeling of being ${pick(r,ADJ)} ${pick(r,PLACES)}.`
       ]);
-      usage=pick(r,[`It was a ${w} sort of morning, all told.`,
+      usage=pick(r,[`It was ${art(w)} ${w} sort of morning, all told.`,
         `"You look ${w}," said the ${pick(r,BEASTS)}, and meant it kindly.`,
         `Nothing is so ${w} as a ${pick(r,BEASTS)} that has changed its mind.`]);
     }
@@ -728,6 +728,8 @@ function describe(word){
   return {word:w,pos:pos,pron:"\\ "+respell(w)+" \\",def:def,usage:usage,etym:etym,plate:(hashStr(w)%888)+11};
 }
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+// coined words can start with a vowel, so the article has to agree
+function art(w){return /^[aeiou]/i.test(w)?"an":"a"}
 
 /* ============ the engraver ============ */
 /* six body plans, so two words never make the same animal */
@@ -1135,13 +1137,17 @@ async function copy(text,ok){
 /* The page may be served inside a sandboxed frame, where location.href is an
    internal URL nobody else can open. Prefer the address the visitor actually sees. */
 function shareBase(){
+  /* Strip BOTH query and hash: the page's own URL already carries ?w=, so
+     keeping it would produce ...?w=word?w=word when the link is rebuilt. */
+  const strip=u=>{try{const x=new URL(u,location.href);return x.origin+x.pathname}
+                  catch(e){return String(u).split("#")[0].split("?")[0]}};
   let framed=true;
   try{framed=(window.top!==window.self)}catch(e){framed=true}
   if(framed){
     const ref=document.referrer||"";
-    return /^https?:\/\//.test(ref)?ref.split("#")[0]:null;
+    return /^https?:\/\//.test(ref)?strip(ref):null;
   }
-  return location.href.split("#")[0];
+  return strip(location.href);
 }
 function wordLink(w){const b=shareBase();return b?b+"?w="+encodeURIComponent(w):null}
 
